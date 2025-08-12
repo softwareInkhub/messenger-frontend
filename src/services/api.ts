@@ -30,9 +30,32 @@ export interface SendMessageRequest {
 // API Service Class
 class ApiService {
   public baseURL: string;
+  private mockMode: boolean = true; // Temporary mock mode
 
   constructor(baseURL: string = react_app_api_base_url) {
     this.baseURL = baseURL;
+  }
+
+  // Temporary mock data for testing
+  private getMockMessages(): MessageData[] {
+    return [
+      {
+        id: 'mock_1',
+        senderId: 'user123',
+        receiverId: 'user456',
+        message: 'Hello! This is a mock message.',
+        status: 'sent',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'mock_2',
+        senderId: 'user456',
+        receiverId: 'user123',
+        message: 'Hi! How are you doing?',
+        status: 'sent',
+        createdAt: new Date().toISOString()
+      }
+    ];
   }
 
   // Generic fetch wrapper with error handling
@@ -40,6 +63,36 @@ class ApiService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
+    // Temporary mock mode
+    if (this.mockMode) {
+      console.log('🎭 Using mock API mode for:', endpoint);
+      
+      if (endpoint.includes('/api/getMessages')) {
+        return {
+          message: 'Messages retrieved successfully (mock)',
+          data: this.getMockMessages(),
+          count: this.getMockMessages().length
+        } as ApiResponse<T>;
+      }
+      
+      if (endpoint.includes('/api/sendMessage')) {
+        const body = options.body ? JSON.parse(options.body as string) : {};
+        const mockMessage: MessageData = {
+          id: `mock_${Date.now()}`,
+          senderId: body.senderId,
+          receiverId: body.receiverId,
+          message: body.message,
+          status: 'sent',
+          createdAt: new Date().toISOString()
+        };
+        
+        return {
+          message: 'Message sent successfully (mock)',
+          data: mockMessage
+        } as ApiResponse<T>;
+      }
+    }
+
     const url = `${this.baseURL}${endpoint}`;
     console.log('🌐 Making API request to:', url);
     
