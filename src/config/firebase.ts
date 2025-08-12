@@ -20,7 +20,7 @@ console.log('🔍 Debug - API Key being used:', process.env.FIREBASE_API_KEY ? '
 console.log('🔍 Debug - Environment loaded:', process.env.FIREBASE_API_KEY ? 'YES' : 'NO');
 
 // Test mode flag - set to true to bypass Firebase for UI testing
-const TEST_MODE = process.env.TEST_MODE === 'true';
+// const TEST_MODE = process.env.TEST_MODE === 'true';
 
 // Validate Firebase config - commented out to avoid unused variable warning
 // const validateFirebaseConfig = () => {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppTheme } from "common/theme";
 import { useChatContext } from "../../context/chat";
-import { useAuth } from "../../../../context/AuthContext";
+// import { useAuth } from "../../../../context/AuthContext";
 import InboxContact from "./contacts";
 import NavigationMenu from "./NavigationMenu";
 import UserSearch from "../../../../components/UserSearch";
