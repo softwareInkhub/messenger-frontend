@@ -7,8 +7,14 @@ const ChatPage = React.lazy(() => import("pages/chat/chat-room-page"));
 const UnSelectedChatPage = React.lazy(() => import("pages/chat/unselected-page"));
 const LoginPage = React.lazy(() => import("pages/auth/LoginPage"));
 const SignupPage = React.lazy(() => import("pages/auth/SignupPage"));
+const DemoPage = React.lazy(() => import("pages/auth/DemoPage"));
+const UserListPage = React.lazy(() => import("pages/UserListPage"));
 
 const router = createBrowserRouter([
+  {
+    path: "/demo",
+    element: <DemoPage />,
+  },
   {
     path: "/login",
     element: <LoginPage />,
@@ -16,6 +22,14 @@ const router = createBrowserRouter([
   {
     path: "/signup",
     element: <SignupPage />,
+  },
+  {
+    path: "/users",
+    element: (
+      <ProtectedRoute>
+        <UserListPage />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/:id",

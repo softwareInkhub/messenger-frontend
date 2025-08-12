@@ -2,27 +2,6 @@ import { VALIDATION_CONSTANTS } from './constants';
 
 // Validation utility functions
 export class ValidationUtils {
-  // Validate phone number
-  static validatePhoneNumber(phoneNumber: string): { isValid: boolean; error?: string } {
-    if (!phoneNumber) {
-      return { isValid: false, error: 'Phone number is required' };
-    }
-
-    if (phoneNumber.length < VALIDATION_CONSTANTS.PHONE_NUMBER.MIN_LENGTH) {
-      return { isValid: false, error: `Phone number must be at least ${VALIDATION_CONSTANTS.PHONE_NUMBER.MIN_LENGTH} digits` };
-    }
-
-    if (phoneNumber.length > VALIDATION_CONSTANTS.PHONE_NUMBER.MAX_LENGTH) {
-      return { isValid: false, error: `Phone number cannot exceed ${VALIDATION_CONSTANTS.PHONE_NUMBER.MAX_LENGTH} digits` };
-    }
-
-    if (!VALIDATION_CONSTANTS.PHONE_NUMBER.PATTERN.test(phoneNumber)) {
-      return { isValid: false, error: 'Invalid phone number format' };
-    }
-
-    return { isValid: true };
-  }
-
   // Validate message
   static validateMessage(message: string): { isValid: boolean; error?: string } {
     if (!message) {
@@ -87,24 +66,6 @@ export class ValidationUtils {
   // Sanitize input
   static sanitizeInput(input: string): string {
     return input.trim().replace(/[<>]/g, '');
-  }
-
-  // Format phone number
-  static formatPhoneNumber(phoneNumber: string): string {
-    // Remove all non-digit characters
-    const cleaned = phoneNumber.replace(/\D/g, '');
-    
-    // Add country code if not present
-    if (!cleaned.startsWith('91') && cleaned.length === 10) {
-      return `+91${cleaned}`;
-    }
-    
-    // Add + if not present
-    if (!cleaned.startsWith('+')) {
-      return `+${cleaned}`;
-    }
-    
-    return cleaned;
   }
 }
 

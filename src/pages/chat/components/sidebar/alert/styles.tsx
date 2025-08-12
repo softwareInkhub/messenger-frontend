@@ -1,4 +1,3 @@
-import { BiX } from "react-icons/bi";
 import styled from "styled-components";
 
 export const AlertContainer = styled.div`
@@ -14,7 +13,7 @@ export const AlertContainer = styled.div`
   }
 `;
 
-export const CloseIcon = styled(BiX)`
+export const CloseIcon = styled.div`
   position: absolute;
   top: 5px;
   right: 15px;

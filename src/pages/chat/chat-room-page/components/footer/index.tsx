@@ -29,15 +29,25 @@ export default function Footer() {
   const { sendMessage, isConnected } = useMessaging(user.id, activeChat?.id || "");
 
   const handleSendMessage = async () => {
-    if (!messageText.trim() || !activeChat || isSending || !isConnected) return;
+    console.log('🎯 Send button clicked:', { messageText, activeChat, isSending });
+    console.log('🎯 User ID:', user.id);
+    console.log('🎯 Active Chat ID:', activeChat?.id);
+    
+    if (!messageText.trim() || !activeChat || isSending) {
+      console.log('❌ Cannot send message:', { hasText: !!messageText.trim(), hasChat: !!activeChat, isSending });
+      return;
+    }
 
     setIsSending(true);
     try {
+      console.log('📤 Calling sendMessage with:', messageText.trim());
       await sendMessage(messageText.trim());
       setMessageText(""); // Clear input after successful send
+      console.log("✅ Message sent successfully!");
     } catch (error) {
-      console.error("Failed to send message:", error);
-      // You could show a toast notification here
+      console.error("❌ Failed to send message:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      alert(`Failed to send message: ${errorMessage}`);
     } finally {
       setIsSending(false);
     }
@@ -66,23 +76,23 @@ export default function Footer() {
       </IconsWrapper>
       <Input 
         placeholder={
-          !isConnected 
-            ? "Backend disconnected..." 
-            : !activeChat 
-              ? "Select a chat to send messages"
+          !activeChat 
+            ? "Select a chat to send messages"
+            : isSending
+              ? "Sending message..."
               : "Type a message here .."
         }
         value={messageText}
         onChange={(e) => setMessageText(e.target.value)}
         onKeyPress={handleKeyPress}
-        disabled={!isConnected || !activeChat || isSending}
+        disabled={!activeChat || isSending}
       />
       <SendMessageButton 
         onClick={handleSendMessage}
-        disabled={!messageText.trim() || !activeChat || isSending || !isConnected}
+        disabled={!messageText.trim() || !activeChat || isSending}
         style={{
-          opacity: (!messageText.trim() || !activeChat || isSending || !isConnected) ? 0.5 : 1,
-          cursor: (!messageText.trim() || !activeChat || isSending || !isConnected) ? 'not-allowed' : 'pointer'
+          opacity: (!messageText.trim() || !activeChat || isSending) ? 0.5 : 1,
+          cursor: (!messageText.trim() || !activeChat || isSending) ? 'not-allowed' : 'pointer'
         }}
       >
         <Icon id={isSending ? "loading" : "send"} className="icon" />

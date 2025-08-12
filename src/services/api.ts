@@ -83,8 +83,10 @@ class ApiService {
   // Get messages for a specific user conversation
   async getConversationMessages(senderId: string, receiverId: string, limit: number = 50): Promise<MessageData[]> {
     try {
+      console.log('🔍 Fetching conversation messages for:', { senderId, receiverId });
       const response = await this.getMessages(limit);
       const allMessages = response.data || [];
+      console.log('📝 Total messages received:', allMessages.length);
       
       // Filter messages for this specific conversation
       const conversationMessages = allMessages.filter(msg => 
@@ -92,12 +94,21 @@ class ApiService {
         (msg.senderId === receiverId && msg.receiverId === senderId)
       );
 
-      // Sort by creation date
+      console.log('📝 Conversation messages found:', conversationMessages.length);
+      console.log('📝 Messages:', conversationMessages.map(msg => ({
+        id: msg.id,
+        message: msg.message,
+        senderId: msg.senderId,
+        receiverId: msg.receiverId
+      })));
+
+      // Sort by creation date (oldest first for chat display)
       return conversationMessages.sort((a, b) => 
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
     } catch (error) {
       console.error('Error fetching conversation messages:', error);
+      // Return empty array if API fails
       return [];
     }
   }

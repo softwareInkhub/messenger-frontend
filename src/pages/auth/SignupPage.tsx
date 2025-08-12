@@ -1,96 +1,25 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { API_CONSTANTS } from "../../config/environment";
-import { 
-  signInWithPhoneNumber, 
-  ConfirmationResult,
-  RecaptchaVerifier 
-} from "firebase/auth";
-import { auth } from "../../config/firebase";
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { signUpWithPhone } from '../../config/firebase';
+
+interface SignupFormData {
+  username: string;
+  phoneNumber: string;
+  password: string;
+  confirmPassword: string;
+}
 
 const SignupPage: React.FC = () => {
-  const [step, setStep] = useState(1); // 1: Signup form, 2: OTP verification
-  const [formData, setFormData] = useState({
-    phoneNumber: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [otp, setOtp] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
-  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
-  const [recaptchaInitialized, setRecaptchaInitialized] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
-
-  // Test Firebase configuration on component mount
-  useEffect(() => {
-    console.log('🔧 Testing Firebase configuration...');
-    console.log('✅ Auth instance:', auth);
-    console.log('✅ Auth config:', auth.config);
-  }, []);
-
-  // Clear reCAPTCHA when component unmounts
-  useEffect(() => {
-    return () => {
-      clearRecaptcha();
-    };
-  }, []);
-
-  const clearRecaptcha = () => {
-    if (recaptchaVerifierRef.current) {
-      try {
-        recaptchaVerifierRef.current.clear();
-        console.log('✅ reCAPTCHA cleared successfully');
-      } catch (error) {
-        console.log('reCAPTCHA already cleared or not rendered');
-      }
-      recaptchaVerifierRef.current = null;
-      setRecaptchaInitialized(false);
-    }
-  };
-
-  const initializeRecaptcha = async () => {
-    try {
-      // Clear any existing reCAPTCHA first
-      clearRecaptcha();
-      
-      // Wait a bit to ensure DOM is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      console.log('🔧 Initializing reCAPTCHA...');
-      
-      // Check if container exists
-      const container = document.getElementById('recaptcha-container');
-      if (!container) {
-        throw new Error('reCAPTCHA container not found');
-      }
-      
-      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {
-          console.log('✅ reCAPTCHA solved');
-        },
-        'expired-callback': () => {
-          console.log('❌ reCAPTCHA expired');
-          clearRecaptcha();
-        }
-      });
-      
-      await recaptchaVerifierRef.current.render();
-      setRecaptchaInitialized(true);
-      console.log('✅ reCAPTCHA initialized and rendered successfully');
-    } catch (error) {
-      console.error('❌ Error initializing reCAPTCHA:', error);
-      clearRecaptcha();
-      throw error;
-    }
-  };
+  const [formData, setFormData] = useState<SignupFormData>({
+    username: '',
+    phoneNumber: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -100,407 +29,281 @@ const SignupPage: React.FC = () => {
     }));
   };
 
-  const formatPhoneNumber = (phone: string) => {
-    // Remove all non-digit characters except +
-    let cleaned = phone.replace(/[^\d+]/g, '');
-    
-    // Add +91 prefix if it's a 10-digit Indian number without country code
-    if (cleaned.length === 10 && !cleaned.startsWith('+')) {
-      return `+91${cleaned}`;
-    }
-    
-    // Add + if it doesn't have country code and is 10 digits
-    if (cleaned.length === 10 && !cleaned.startsWith('+')) {
-      return `+${cleaned}`;
-    }
-    
-    // If it already has +, return as is
-    if (cleaned.startsWith('+')) {
-      return cleaned;
-    }
-    
-    // Default: add +91 for Indian numbers
-    return `+91${cleaned}`;
-  };
+  const validateForm = (): boolean => {
+    // Clear previous messages
+    setError('');
+    setSuccess('');
 
-  const validatePhoneNumber = (phone: string) => {
-    const formatted = formatPhoneNumber(phone);
-    
-    // Basic validation
-    if (formatted.length < 10) {
-      return { isValid: false, error: "Phone number too short" };
+    // Username validation
+    if (!formData.username.trim()) {
+      setError('Username is required');
+      return false;
     }
-    
-    if (formatted.length > 15) {
-      return { isValid: false, error: "Phone number too long" };
+    if (formData.username.length < 3) {
+      setError('Username must be at least 3 characters long');
+      return false;
     }
-    
-    // Check if it starts with +
-    if (!formatted.startsWith('+')) {
-      return { isValid: false, error: "Phone number must include country code" };
-    }
-    
-    return { isValid: true, formatted };
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validation
-    if (!formData.phoneNumber || !formData.username || !formData.password) {
-      setError("Please fill in all fields");
-      return;
+    if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      setError('Username can only contain letters, numbers, and underscores');
+      return false;
     }
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      return;
+    // Phone number validation
+    if (!formData.phoneNumber.trim()) {
+      setError('Phone number is required');
+      return false;
+    }
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(formData.phoneNumber.replace(/\s/g, ''))) {
+      setError('Please enter a valid phone number (e.g., +1234567890)');
+      return false;
     }
 
+    // Password validation
+    if (!formData.password) {
+      setError('Password is required');
+      return false;
+    }
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long");
-      return;
+      setError('Password must be at least 6 characters long');
+      return false;
     }
 
-    // Validate phone number
-    const phoneValidation = validatePhoneNumber(formData.phoneNumber);
-    if (!phoneValidation.isValid) {
-      setError(phoneValidation.error || "Invalid phone number");
-      return;
+    // Confirm password validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
     }
 
-    setLoading(true);
-    setError("");
-    setMessage("");
-
-    try {
-      console.log('📝 Validating registration data with backend...');
-      
-      const response = await fetch(`${API_CONSTANTS.BASE_URL}${API_CONSTANTS.ENDPOINTS.AUTH.SIGNUP}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phoneNumber: phoneValidation.formatted || formData.phoneNumber,
-          username: formData.username,
-          password: formData.password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration validation failed');
-      }
-
-      console.log('✅ Registration data validated:', data);
-      setMessage("Registration data validated! Now sending OTP to your phone...");
-      
-      // Send OTP using Firebase Phone Auth
-      await sendOTP(phoneValidation.formatted || formData.phoneNumber);
-      
-    } catch (error: any) {
-      console.error('❌ Registration validation error:', error);
-      setError(error.message || 'Registration validation failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    return true;
   };
 
-  const sendOTP = async (phoneNumber: string) => {
-    try {
-      setLoading(true);
-      setError("");
-      
-      console.log('📱 Sending REAL SMS OTP to:', phoneNumber);
-
-      // Initialize reCAPTCHA only if not already initialized
-      if (!recaptchaInitialized) {
-        await initializeRecaptcha();
-      }
-
-      // Send OTP using Firebase Phone Auth (REAL SMS)
-      const confirmation = await signInWithPhoneNumber(
-        auth, 
-        phoneNumber, 
-        recaptchaVerifierRef.current!
-      );
-
-      console.log('✅ REAL SMS OTP sent successfully via Firebase Phone Auth');
-      setConfirmationResult(confirmation);
-      setStep(2);
-      setMessage(`Real SMS OTP sent to ${phoneNumber}. Check your phone for the 6-digit code.`);
-      
-    } catch (error: any) {
-      console.error('❌ Send OTP error:', error);
-      
-      // Handle specific Firebase errors
-      if (error.code === 'auth/invalid-phone-number') {
-        setError('Invalid phone number format. Please use international format (e.g., +91XXXXXXXXXX)');
-      } else if (error.code === 'auth/too-many-requests') {
-        setError('Too many attempts. Please wait a few minutes before trying again.');
-      } else if (error.code === 'auth/quota-exceeded') {
-        setError('SMS quota exceeded. Please try again later.');
-      } else if (error.code === 'auth/invalid-app-credential') {
-        setError('Firebase configuration issue. Please check your Firebase setup and enable Phone Auth.');
-      } else if (error.code === 'auth/recaptcha-not-enabled') {
-        setError('reCAPTCHA not enabled. Please check Firebase Console settings.');
-      } else if (error.code === 'auth/invalid-recaptcha-token') {
-        setError('reCAPTCHA token invalid. Please refresh the page and try again.');
-        clearRecaptcha();
-      } else if (error.code === 'auth/billing-not-enabled') {
-        setError('Firebase billing not enabled. Please upgrade to Blaze plan for real SMS.');
-      } else if (error.message.includes('reCAPTCHA has already been rendered')) {
-        setError('reCAPTCHA error. Please refresh the page and try again.');
-        clearRecaptcha();
-      } else {
-        setError(error.message || 'Failed to send OTP. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!otp || otp.length !== 6) {
-      setError("Please enter the complete 6-digit OTP");
-      return;
-    }
-
-    if (!confirmationResult) {
-      setError("No OTP session found. Please request a new OTP.");
+    if (!validateForm()) {
       return;
     }
 
     setLoading(true);
-    setError("");
-    setMessage("");
+    setError('');
 
     try {
-      console.log('🔐 Verifying OTP with Firebase...');
+      await signUpWithPhone(
+        formData.phoneNumber,
+        formData.password,
+        formData.username
+      );
       
-      // Verify OTP with Firebase
-      const result = await confirmationResult.confirm(otp);
-      
-      console.log('✅ OTP verified with Firebase:', result.user);
-
-      // Get the ID token from Firebase
-      const idToken = await result.user.getIdToken();
-      
-      // Send ID token to backend for user creation/verification
-      const response = await fetch(`${API_CONSTANTS.BASE_URL}${API_CONSTANTS.ENDPOINTS.AUTH.VERIFY_OTP}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
-        },
-        body: JSON.stringify({
-          phoneNumber: formData.phoneNumber,
-          username: formData.username,
-          password: formData.password, // Send password for user creation
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Backend verification failed');
-      }
-
-      console.log('✅ Backend verification successful:', data);
-      
-      // Auto-login after successful verification
-      await login(data.user);
-      
-      setMessage("Phone number verified and user created successfully! Redirecting...");
-      
-      // Redirect to chat page
+      setSuccess('Account created successfully! Redirecting to login...');
       setTimeout(() => {
-        navigate("/chat");
-      }, 1000);
+        navigate('/login');
+      }, 2000);
       
     } catch (error: any) {
-      console.error('❌ OTP verification error:', error);
+      console.error('Signup error:', error);
       
       // Handle specific Firebase errors
-      if (error.code === 'auth/invalid-verification-code') {
-        setError('Invalid OTP. Please check the code and try again.');
-      } else if (error.code === 'auth/code-expired') {
-        setError('OTP has expired. Please request a new one.');
-      } else {
-        setError(error.message || 'OTP verification failed. Please try again.');
+      switch (error.code) {
+        case 'auth/email-already-in-use':
+          setError('An account with this phone number already exists');
+          break;
+        case 'auth/invalid-email':
+          setError('Invalid phone number format');
+          break;
+        case 'auth/weak-password':
+          setError('Password is too weak. Please choose a stronger password');
+          break;
+        case 'auth/operation-not-allowed':
+          setError('Email/password authentication is not enabled');
+          break;
+        default:
+          setError(error.message || 'An error occurred during signup');
       }
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleResendOTP = () => {
-    setOtp("");
-    const phoneValidation = validatePhoneNumber(formData.phoneNumber);
-    if (phoneValidation.isValid) {
-      sendOTP(phoneValidation.formatted || formData.phoneNumber);
-    } else {
-      setError(phoneValidation.error || "Invalid phone number");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {step === 1 ? "Create your account" : "Verify your phone number"}
-          </h2>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="flex justify-center">
+          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+            </svg>
+          </div>
         </div>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Create your account
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Or{' '}
+          <Link to="/login" className="font-medium text-green-600 hover:text-green-500">
+            sign in to your existing account
+          </Link>
+        </p>
+      </div>
 
-        {/* reCAPTCHA container (invisible) */}
-        <div id="recaptcha-container" ref={recaptchaContainerRef}></div>
-
-        {step === 1 ? (
-          <form className="mt-8 space-y-6" onSubmit={handleSignup}>
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Username Field */}
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                Username
+              </label>
+              <div className="mt-1">
                 <input
-                  name="phoneNumber"
-                  type="tel"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Phone number (e.g., 9876543210 or +919876543210)"
-                  value={formData.phoneNumber}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div>
-                <input
+                  id="username"
                   name="username"
                   type="text"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Username"
                   value={formData.username}
                   onChange={handleInputChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                  placeholder="Enter your username"
                 />
               </div>
-              <div>
+            </div>
+
+            {/* Phone Number Field */}
+            <div>
+              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
+                Phone Number
+              </label>
+              <div className="mt-1">
                 <input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="tel"
+                  required
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                  placeholder="+1234567890"
+                />
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
                   name="password"
                   type="password"
-                  autoComplete="new-password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Password"
                   value={formData.password}
                   onChange={handleInputChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                  placeholder="Enter your password"
                 />
               </div>
-              <div>
+            </div>
+
+            {/* Confirm Password Field */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Confirm Password
+              </label>
+              <div className="mt-1">
                 <input
+                  id="confirmPassword"
                   name="confirmPassword"
                   type="password"
-                  autoComplete="new-password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                  placeholder="Confirm Password"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                  placeholder="Confirm your password"
                 />
               </div>
             </div>
 
+            {/* Error Message */}
             {error && (
-              <div className="text-red-600 text-sm text-center">{error}</div>
+              <div className="rounded-md bg-red-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">{error}</h3>
+                  </div>
+                </div>
+              </div>
             )}
 
-            {message && (
-              <div className="text-green-600 text-sm text-center">{message}</div>
+            {/* Success Message */}
+            {success && (
+              <div className="rounded-md bg-green-50 p-4">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-green-800">{success}</h3>
+                  </div>
+                </div>
+              </div>
             )}
 
+            {/* Submit Button */}
             <div>
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Validating..." : "Create account"}
+                {loading ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating account...
+                  </div>
+                ) : (
+                  'Create Account'
+                )}
               </button>
             </div>
-
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => navigate("/login")}
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  Sign in
-                </button>
-              </p>
-            </div>
           </form>
-        ) : (
-          <form className="mt-8 space-y-6" onSubmit={handleVerifyOTP}>
-            <div>
-              <p className="text-sm text-gray-600 text-center mb-4">
-                Enter the 6-digit code sent to {formatPhoneNumber(formData.phoneNumber)}
-              </p>
-              <div className="flex justify-center">
-                <input
-                  type="text"
-                  maxLength={6}
-                  className="text-center text-2xl font-bold tracking-widest w-48 px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="000000"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                />
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Already have an account?</span>
               </div>
             </div>
 
-            {error && (
-              <div className="text-red-600 text-sm text-center">{error}</div>
-            )}
-
-            {message && (
-              <div className="text-green-600 text-sm text-center">{message}</div>
-            )}
-
-            <div className="space-y-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            <div className="mt-6">
+              <Link
+                to="/login"
+                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
-                {loading ? "Verifying..." : "Verify OTP"}
-              </button>
-              
-              <button
-                type="button"
-                onClick={handleResendOTP}
-                disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-              >
-                Resend OTP
-              </button>
+                Sign in
+              </Link>
             </div>
-
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="text-sm text-indigo-600 hover:text-indigo-500"
-              >
-                ← Back to signup
-              </button>
-            </div>
-          </form>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default SignupPage; 
+export default SignupPage;
+
+

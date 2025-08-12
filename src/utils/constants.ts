@@ -13,18 +13,13 @@ export const API_CONSTANTS = {
   ENDPOINTS: {
     SEND_MESSAGE: '/api/sendMessage',
     GET_MESSAGES: '/api/getMessages',
+    GET_MESSAGES_BY_SENDER: '/api/messages/sender',
+    GET_MESSAGES_BY_RECEIVER: '/api/messages/receiver',
     HEALTH: '/health',
     TEST: '/test',
   },
   TIMEOUT: 10000, // 10 seconds
   RETRY_ATTEMPTS: 3,
-};
-
-// Firebase Constants
-export const FIREBASE_CONSTANTS = {
-  CONFIG: environment.firebase,
-  RECAPTCHA_SIZE: 'invisible' as const,
-  PHONE_AUTH_TIMEOUT: 60000, // 60 seconds
 };
 
 // UI Constants
@@ -39,18 +34,12 @@ export const UI_CONSTANTS = {
 
 // Feature Flags
 export const FEATURE_FLAGS = {
-  AUTHENTICATION: environment.features.authentication,
   REAL_TIME_MESSAGING: environment.features.realTimeMessaging,
   FILE_UPLOAD: environment.features.fileUpload,
 };
 
 // Validation Constants
 export const VALIDATION_CONSTANTS = {
-  PHONE_NUMBER: {
-    MIN_LENGTH: 10,
-    MAX_LENGTH: 15,
-    PATTERN: /^\+?[1-9]\d{1,14}$/,
-  },
   MESSAGE: {
     MIN_LENGTH: 1,
     MAX_LENGTH: 1000,
@@ -64,7 +53,6 @@ export const VALIDATION_CONSTANTS = {
 // Error Messages
 export const ERROR_MESSAGES = {
   NETWORK_ERROR: 'Network error. Please check your connection.',
-  AUTHENTICATION_ERROR: 'Authentication failed. Please try again.',
   VALIDATION_ERROR: 'Please check your input and try again.',
   SERVER_ERROR: 'Server error. Please try again later.',
   TIMEOUT_ERROR: 'Request timeout. Please try again.',
@@ -74,7 +62,6 @@ export const ERROR_MESSAGES = {
 // Success Messages
 export const SUCCESS_MESSAGES = {
   MESSAGE_SENT: 'Message sent successfully!',
-  AUTHENTICATION_SUCCESS: 'Authentication successful!',
   CONNECTION_SUCCESS: 'Connected to server successfully!',
 };
 

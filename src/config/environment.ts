@@ -1,7 +1,7 @@
 // Environment configuration with validation
 export const environment = {
   // API Configuration
-  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || 'https://messenger-backend-softwareinkhub.vercel.app',
+  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001',
   
   // Firebase Configuration
   firebase: {
@@ -37,43 +37,23 @@ export const environment = {
 
 // API Constants for backend endpoints
 export const API_CONSTANTS = {
-  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'https://messenger-backend-softwareinkhub.vercel.app',
+  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001',
   ENDPOINTS: {
-    AUTH: {
-      LOGIN: '/api/auth/login',
-      SIGNUP: '/api/auth/signup',
-      VERIFY_OTP: '/api/auth/verifyOTP',
-    },
-    MESSAGES: {
-      SEND: '/api/sendMessage',
-      GET: '/api/getMessages',
-      GET_BY_SENDER: '/api/messages/sender',
-      GET_BY_RECEIVER: '/api/messages/receiver',
-    },
+    SEND_MESSAGE: '/api/sendMessage',
+    GET_MESSAGES: '/api/getMessages',
+    GET_MESSAGES_BY_SENDER: '/api/messages/sender',
+    GET_MESSAGES_BY_RECEIVER: '/api/messages/receiver',
   },
 };
 
-// Validate required environment variables
-export const validateEnvironment = () => {
-  const requiredVars = [
-    'REACT_APP_FIREBASE_API_KEY',
-    'REACT_APP_FIREBASE_AUTH_DOMAIN',
-    'REACT_APP_FIREBASE_PROJECT_ID',
-    'REACT_APP_FIREBASE_APP_ID',
-  ];
-
-  const missingVars = requiredVars.filter(varName => !process.env[varName]);
-  
-  if (missingVars.length > 0) {
-    console.warn('⚠️ Missing required environment variables:', missingVars);
-    console.warn('Please check your .env file');
-  }
-
-  return missingVars.length === 0;
+// Error messages
+export const ERROR_MESSAGES = {
+  NETWORK_ERROR: 'Network error. Please check your connection.',
+  BACKEND_ERROR: 'Backend service error. Please try again later.',
+  VALIDATION_ERROR: 'Invalid data provided.',
+  UNAUTHORIZED: 'Unauthorized access.',
+  NOT_FOUND: 'Resource not found.',
 };
-
-// Export validation result
-export const isEnvironmentValid = validateEnvironment();
 
 
 

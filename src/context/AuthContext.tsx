@@ -1,82 +1,119 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { 
+  User, 
+  signInWithPhoneNumber, 
+  ConfirmationResult,
+  onAuthStateChanged,
+  signOut as firebaseSignOut
+} from 'firebase/auth';
+import { auth, createRecaptchaVerifier } from '../config/firebase';
 
-// Backend user interface
-interface BackendUser {
+// User type for our app
+export interface AppUser {
   uid: string;
   phoneNumber: string;
-  username: string;
+  displayName?: string;
+  photoURL?: string;
   isPhoneVerified: boolean;
 }
 
+// Auth context type
 interface AuthContextType {
-  user: BackendUser | null;
+  user: AppUser | null;
   loading: boolean;
-  logout: () => Promise<void>;
-  login: (userData: BackendUser) => Promise<void>;
+  signInWithPhone: (phoneNumber: string, recaptchaVerifier: any) => Promise<ConfirmationResult>;
+  confirmOTP: (confirmationResult: ConfirmationResult, otp: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  isPhoneVerified: boolean;
 }
 
+// Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<BackendUser | null>(null);
+// Auth provider component
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
+  // Listen for auth state changes
   useEffect(() => {
-    // Check for stored user data on app load
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const userData = JSON.parse(storedUser) as BackendUser;
-        console.log('🔐 Found stored user data:', userData);
-        setUser(userData);
-      } catch (error) {
-        console.error('Error parsing stored user data:', error);
-        localStorage.removeItem('user');
-      }
+    if (!auth) {
+      console.warn('Firebase Auth not initialized');
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: User | null) => {
+      if (firebaseUser) {
+        const appUser: AppUser = {
+          uid: firebaseUser.uid,
+          phoneNumber: firebaseUser.phoneNumber || '',
+          displayName: firebaseUser.displayName || undefined,
+          photoURL: firebaseUser.photoURL || undefined,
+          isPhoneVerified: !!firebaseUser.phoneNumber,
+        };
+        setUser(appUser);
+        setIsPhoneVerified(!!firebaseUser.phoneNumber);
+      } else {
+        setUser(null);
+        setIsPhoneVerified(false);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = async (userData: BackendUser) => {
+  // Sign in with phone number
+  const signInWithPhone = async (phoneNumber: string, recaptchaVerifier: any) => {
+    if (!auth) {
+      throw new Error('Firebase Auth not initialized');
+    }
+    
     try {
-      console.log('🔐 Logging in user:', userData);
-      setUser(userData);
-      // Store user data in localStorage for persistence
-      localStorage.setItem('user', JSON.stringify(userData));
+      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
+      return confirmationResult;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Error signing in with phone:', error);
       throw error;
     }
   };
 
-  const logout = async () => {
+  // Confirm OTP
+  const confirmOTP = async (confirmationResult: ConfirmationResult, otp: string) => {
     try {
-      setUser(null);
-      // Clear user data from localStorage
-      localStorage.removeItem('user');
-      console.log('🔐 User logged out successfully');
+      await confirmationResult.confirm(otp);
+      console.log('Phone number verified successfully');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Error confirming OTP:', error);
+      throw error;
     }
   };
 
-  const value = {
+  // Sign out
+  const signOut = async () => {
+    if (!auth) {
+      throw new Error('Firebase Auth not initialized');
+    }
+    
+    try {
+      await firebaseSignOut(auth);
+      setUser(null);
+      setIsPhoneVerified(false);
+    } catch (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
+  };
+
+  const value: AuthContextType = {
     user,
     loading,
-    logout,
-    login,
+    signInWithPhone,
+    confirmOTP,
+    signOut,
+    isPhoneVerified,
   };
 
   return (
@@ -84,4 +121,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-}; 
+};
+
+// Custom hook to use auth context
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

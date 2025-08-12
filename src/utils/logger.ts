@@ -66,16 +66,6 @@ export class Logger {
     this.error(`API Error: ${method} ${url}`, error);
   }
 
-  // Firebase logging
-  static logFirebase(message: string, data?: any) {
-    this.info(`Firebase: ${message}`, data);
-  }
-
-  // Firebase error logging
-  static logFirebaseError(message: string, error: any) {
-    this.error(`Firebase Error: ${message}`, error);
-  }
-
   // User action logging
   static logUserAction(action: string, data?: any) {
     this.info(`User Action: ${action}`, data);

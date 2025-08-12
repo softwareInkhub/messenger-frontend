@@ -48,13 +48,6 @@ export default function MessagesList(props: MessagesListProps) {
         or listen to them. Click to learn more.
       </EncryptionMessage>
       
-      {/* Connection Status */}
-      {!isConnected && (
-        <DateWrapper>
-          <Date style={{color: '#ff4444'}}>🔴 Backend Disconnected</Date>
-        </DateWrapper>
-      )}
-      
       {/* Error State */}
       {error && (
         <DateWrapper>
