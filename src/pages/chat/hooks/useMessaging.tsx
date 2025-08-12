@@ -21,7 +21,7 @@ const convertToFrontendMessage = (backendMsg: MessageData, currentUserId: string
     body: backendMsg.message,
     date: date.toLocaleDateString('en-GB'),
     timestamp: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-    messageStatus: backendMsg.status.toUpperCase() as any,
+    messageStatus: backendMsg.status.toUpperCase() as "READ" | "DELIVERED" | "SENT",
     isOpponent: isOpponent,
   };
 };

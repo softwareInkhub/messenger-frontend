@@ -34,6 +34,16 @@ export default function MessagesList(props: MessagesListProps) {
     activeChat?.id || ""
   );
 
+  // Debug messages state
+  console.log('🔍 MessagesList Debug:', {
+    messagesCount: messages.length,
+    messages: messages,
+    isLoading,
+    error,
+    user: user.id,
+    activeChat: activeChat?.id
+  });
+
   const { containerRef, lastMessageRef } = useScrollToBottom(
     onShowBottomIcon,
     shouldScrollToBottom,
