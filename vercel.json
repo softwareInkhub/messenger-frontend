@@ -20,7 +20,7 @@
     }
   ],
   "env": {
-    "REACT_APP_API_BASE_URL": "https://messnger-backend-1.onrender.com"
+    "REACT_APP_API_BASE_URL": "https://your-vercel-backend-url.vercel.app"
   }
 }
 

@@ -84,10 +84,22 @@ class ApiService {
 
   // Send a message to backend
   async sendMessage(messageData: SendMessageRequest): Promise<ApiResponse<MessageData>> {
-    return this.request<MessageData>(API_CONSTANTS.ENDPOINTS.SEND_MESSAGE, {
-      method: 'POST',
-      body: JSON.stringify(messageData),
-    });
+    console.log('📤 Sending message to backend:', messageData);
+    console.log('📤 Backend URL:', this.baseURL);
+    console.log('📤 Endpoint:', API_CONSTANTS.ENDPOINTS.SEND_MESSAGE);
+    
+    try {
+      const response = await this.request<MessageData>(API_CONSTANTS.ENDPOINTS.SEND_MESSAGE, {
+        method: 'POST',
+        body: JSON.stringify(messageData),
+      });
+      
+      console.log('✅ Send message response:', response);
+      return response;
+    } catch (error) {
+      console.error('❌ Send message failed:', error);
+      throw error;
+    }
   }
 
   // Get all messages from backend
