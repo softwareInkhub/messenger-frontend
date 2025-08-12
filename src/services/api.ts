@@ -30,7 +30,7 @@ export interface SendMessageRequest {
 // API Service Class
 class ApiService {
   public baseURL: string;
-  private mockMode: boolean = true; // Temporarily use mock to test UI
+  private mockMode: boolean = false; // Use real API - CORS is fixed
 
   constructor(baseURL: string = react_app_api_base_url) {
     this.baseURL = baseURL;
@@ -42,14 +42,14 @@ class ApiService {
       {
         id: 'mock_1',
         senderId: '2ur0a10vwmXAcHTmp2NsEu410Um1',
-        receiverId: 'fANTvRLXqThjvs5CHUSoraXgor92',
+        receiverId: 'nigX5VJDH8cF8sYtTRBju5wjahQ2',
         message: 'Hello! This is a mock message from user 1.',
         status: 'sent',
         createdAt: new Date().toISOString()
       },
       {
         id: 'mock_2',
-        senderId: 'fANTvRLXqThjvs5CHUSoraXgor92',
+        senderId: 'nigX5VJDH8cF8sYtTRBju5wjahQ2',
         receiverId: '2ur0a10vwmXAcHTmp2NsEu410Um1',
         message: 'Hi! How are you doing? This is from user 2.',
         status: 'sent',
@@ -58,7 +58,7 @@ class ApiService {
       {
         id: 'mock_3',
         senderId: '2ur0a10vwmXAcHTmp2NsEu410Um1',
-        receiverId: 'fANTvRLXqThjvs5CHUSoraXgor92',
+        receiverId: 'nigX5VJDH8cF8sYtTRBju5wjahQ2',
         message: 'The messaging system is working!',
         status: 'sent',
         createdAt: new Date().toISOString()
@@ -189,6 +189,7 @@ class ApiService {
       const response = await this.getMessages(limit);
       const allMessages = response.data || [];
       console.log('📝 Total messages received:', allMessages.length);
+      console.log('📝 All messages:', allMessages);
       
       // Filter messages for this specific conversation
       const conversationMessages = allMessages.filter(msg => 
@@ -197,7 +198,7 @@ class ApiService {
       );
 
       console.log('📝 Conversation messages found:', conversationMessages.length);
-      console.log('📝 Messages:', conversationMessages.map(msg => ({
+      console.log('📝 Filtered messages:', conversationMessages.map(msg => ({
         id: msg.id,
         message: msg.message,
         senderId: msg.senderId,
@@ -209,7 +210,7 @@ class ApiService {
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
     } catch (error) {
-      console.error('Error fetching conversation messages:', error);
+      console.error('❌ Error fetching conversation messages:', error);
       // Return empty array if API fails
       return [];
     }
