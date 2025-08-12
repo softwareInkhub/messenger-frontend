@@ -30,7 +30,7 @@ export interface SendMessageRequest {
 // API Service Class
 class ApiService {
   public baseURL: string;
-  private mockMode: boolean = true; // Temporary mock mode
+  private mockMode: boolean = true; // Temporarily use mock to test UI
 
   constructor(baseURL: string = react_app_api_base_url) {
     this.baseURL = baseURL;
@@ -41,17 +41,25 @@ class ApiService {
     return [
       {
         id: 'mock_1',
-        senderId: 'user123',
-        receiverId: 'user456',
-        message: 'Hello! This is a mock message.',
+        senderId: '2ur0a10vwmXAcHTmp2NsEu410Um1',
+        receiverId: 'fANTvRLXqThjvs5CHUSoraXgor92',
+        message: 'Hello! This is a mock message from user 1.',
         status: 'sent',
         createdAt: new Date().toISOString()
       },
       {
         id: 'mock_2',
-        senderId: 'user456',
-        receiverId: 'user123',
-        message: 'Hi! How are you doing?',
+        senderId: 'fANTvRLXqThjvs5CHUSoraXgor92',
+        receiverId: '2ur0a10vwmXAcHTmp2NsEu410Um1',
+        message: 'Hi! How are you doing? This is from user 2.',
+        status: 'sent',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'mock_3',
+        senderId: '2ur0a10vwmXAcHTmp2NsEu410Um1',
+        receiverId: 'fANTvRLXqThjvs5CHUSoraXgor92',
+        message: 'The messaging system is working!',
         status: 'sent',
         createdAt: new Date().toISOString()
       }
