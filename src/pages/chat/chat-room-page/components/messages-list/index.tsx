@@ -29,7 +29,7 @@ export default function MessagesList(props: MessagesListProps) {
   const { user, activeChat } = useChatContext();
   
   // Use real messaging hook instead of static data
-  const { messages, isLoading, error, isConnected } = useMessaging(
+  const { messages, isLoading, error } = useMessaging(
     user.id, 
     activeChat?.id || ""
   );

@@ -22,58 +22,58 @@ console.log('🔍 Debug - Environment loaded:', process.env.FIREBASE_API_KEY ? '
 // Test mode flag - set to true to bypass Firebase for UI testing
 const TEST_MODE = process.env.TEST_MODE === 'true';
 
-// Validate Firebase config
-const validateFirebaseConfig = () => {
-  // Allow test mode to bypass Firebase
-  if (TEST_MODE) {
-    console.warn('🧪 Test mode enabled - Firebase authentication disabled');
-    return false;
-  }
-  
-  // Check if we're using demo values
-  const isUsingDemoValues = firebaseConfig.apiKey === 'demo-api-key' || 
-                           firebaseConfig.authDomain === 'demo-project.firebaseapp.com' ||
-                           !firebaseConfig.apiKey || firebaseConfig.apiKey.length < 10;
-  
-  if (isUsingDemoValues) {
-    console.error('❌ Firebase API Key Error: Using demo/placeholder values');
-    console.error('📝 To fix this error:');
-    console.error('1. Go to https://console.firebase.google.com/');
-    console.error('2. Create a new project or select existing one');
-    console.error('3. Add a web app to your project');
-    console.error('4. Copy the Firebase config object');
-    console.error('5. Update the .env file with your real credentials');
-    console.error('📖 See FIREBASE_SETUP_INSTRUCTIONS.md for detailed steps');
-    console.error('💡 Or set TEST_MODE=true in .env to bypass Firebase');
-    return false;
-  }
-  
-  // Check if we have valid Firebase config
-  if (firebaseConfig.apiKey && firebaseConfig.apiKey.length > 10) {
-    console.log('✅ Firebase config looks valid');
-    return true;
-  }
-  
-  const requiredFields = [
-    'apiKey',
-    'authDomain', 
-    'projectId',
-    'storageBucket',
-    'messagingSenderId',
-    'appId'
-  ];
-  
-  const missingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
-  
-  if (missingFields.length > 0) {
-    console.error('❌ Missing Firebase configuration:', missingFields);
-    console.error('📝 Please update your .env file with Firebase config');
-    console.error('📖 See FIREBASE_SETUP_INSTRUCTIONS.md for instructions');
-    return false;
-  }
-  
-  return true;
-};
+// Validate Firebase config - commented out to avoid unused variable warning
+// const validateFirebaseConfig = () => {
+//   // Allow test mode to bypass Firebase
+//   if (TEST_MODE) {
+//     console.warn('🧪 Test mode enabled - Firebase authentication disabled');
+//     return false;
+//   }
+//   
+//   // Check if we're using demo values
+//   const isUsingDemoValues = firebaseConfig.apiKey === 'demo-api-key' || 
+//                            firebaseConfig.authDomain === 'demo-project.firebaseapp.com' ||
+//                            !firebaseConfig.apiKey || firebaseConfig.apiKey.length < 10;
+//   
+//   if (isUsingDemoValues) {
+//     console.error('❌ Firebase API Key Error: Using demo/placeholder values');
+//     console.error('📝 To fix this error:');
+//     console.error('1. Go to https://console.firebase.google.com/');
+//     console.error('2. Create a new project or select existing one');
+//     console.error('3. Add a web app to your project');
+//     console.error('4. Copy the Firebase config object');
+//     console.error('5. Update the .env file with your real credentials');
+//     console.error('📖 See FIREBASE_SETUP_INSTRUCTIONS.md for detailed steps');
+//     console.error('💡 Or set TEST_MODE=true in .env to bypass Firebase');
+//     return false;
+//   }
+//   
+//   // Check if we have valid Firebase config
+//   if (firebaseConfig.apiKey && firebaseConfig.apiKey.length > 10) {
+//     console.log('✅ Firebase config looks valid');
+//     return true;
+//   }
+//   
+//   const requiredFields = [
+//     'apiKey',
+//     'authDomain', 
+//     'projectId',
+//     'storageBucket',
+//     'messagingSenderId',
+//     'appId'
+//   ];
+//   
+//   const missingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
+//   
+//   if (missingFields.length > 0) {
+//     console.error('❌ Missing Firebase configuration:', missingFields);
+//     console.error('📝 Please update your .env file with Firebase config');
+//     console.error('📖 See FIREBASE_SETUP_INSTRUCTIONS.md for instructions');
+//     return false;
+//   }
+//   
+//   return true;
+// };
 
 // Initialize Firebase only if config is valid
 let app;

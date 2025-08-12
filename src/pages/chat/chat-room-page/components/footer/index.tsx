@@ -26,7 +26,7 @@ export default function Footer() {
   const [isSending, setIsSending] = useState(false);
   
   const { user, activeChat } = useChatContext();
-  const { sendMessage, isConnected } = useMessaging(user.id, activeChat?.id || "");
+  const { sendMessage } = useMessaging(user.id, activeChat?.id || "");
 
   const handleSendMessage = async () => {
     console.log('🎯 Send button clicked:', { messageText, activeChat, isSending });

@@ -9,8 +9,7 @@ import {
   limit, 
   setDoc, 
   updateDoc,
-  deleteDoc,
-  Timestamp 
+  deleteDoc
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { searchUsersByUsername, SearchResult } from '../utils/firebaseUsers';
 
 interface UserSearchProps {
@@ -19,38 +19,35 @@ const UserSearch: React.FC<UserSearchProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [showResults, setShowResults] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Debounced search function
-  const debouncedSearch = useCallback(
-    (() => {
-      let timeoutId: NodeJS.Timeout;
-      return (term: string) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(async () => {
-          if (term.trim().length < 2) {
-            setResults([]);
-            setShowResults(false);
-            return;
-          }
+  const debouncedSearch = useCallback((term: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(async () => {
+      if (term.trim().length < 2) {
+        setResults([]);
+        setShowResults(false);
+        return;
+      }
 
-          setLoading(true);
-          setError('');
+      setLoading(true);
+      setError('');
 
-          try {
-            const searchResults = await searchUsersByUsername(term, maxResults);
-            setResults(searchResults);
-            setShowResults(true);
-          } catch (err: any) {
-            setError(err.message || 'Error searching users');
-            setResults([]);
-          } finally {
-            setLoading(false);
-          }
-        }, 300);
-      };
-    })(),
-    [maxResults]
-  );
+      try {
+        const searchResults = await searchUsersByUsername(term, maxResults);
+        setResults(searchResults);
+        setShowResults(true);
+      } catch (err: any) {
+        setError(err.message || 'Error searching users');
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 300);
+  }, [maxResults]);
 
   useEffect(() => {
     debouncedSearch(searchTerm);

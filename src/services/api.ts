@@ -1,5 +1,5 @@
 import { environment } from '../config/environment';
-import { API_CONSTANTS, ERROR_MESSAGES } from '../utils/constants';
+import { API_CONSTANTS } from '../utils/constants';
 import { Logger } from '../utils/logger';
 
 // API Configuration - Using environment variables

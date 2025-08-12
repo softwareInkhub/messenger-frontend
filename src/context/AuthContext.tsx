@@ -6,7 +6,7 @@ import {
   onAuthStateChanged,
   signOut as firebaseSignOut
 } from 'firebase/auth';
-import { auth, createRecaptchaVerifier } from '../config/firebase';
+import { auth } from '../config/firebase';
 
 // User type for our app
 export interface AppUser {

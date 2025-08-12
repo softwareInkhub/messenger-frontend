@@ -25,7 +25,7 @@ export default function Sidebar() {
   const navigate = useNavigate();
   const chatCtx = useChatContext();
   const [showUserSearch, setShowUserSearch] = useState(false);
-  const { user: currentUser } = useAuth();
+  // const { user: currentUser } = useAuth();
 
   const handleChangeThemeMode = () => {
     theme.onChangeThemeMode();

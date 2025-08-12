@@ -46,7 +46,7 @@ export const useMessaging = (currentUserId: string, selectedContactId: string): 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isConnected, setIsConnected] = useState(true); // Always connected
+  // const [isConnected, setIsConnected] = useState(true); // Always connected
 
   // Fetch messages for the current conversation
   const refreshMessages = useCallback(async () => {
