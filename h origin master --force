@@ -1,0 +1,5 @@
+[33m7e3ddc8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m)[m Initial commit: WhatsApp-style messaging app with Firebase auth and real-time messaging
+[33m8a5c5a1[m fix: Update API base URL to use Vercel backend
+[33m47ad51e[m feat: Add Vercel deployment configuration and real SMS OTP support
+[33m4abd2d9[m fixed
+[33maeb40a0[m fixed

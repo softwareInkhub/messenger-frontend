@@ -16,11 +16,11 @@ const firebaseConfig = {
 };
 
 // Debug: Log the API key being used
-console.log('🔍 Debug - API Key being used:', process.env.REACT_APP_FIREBASE_API_KEY ? 'REAL KEY' : 'DEMO KEY');
-console.log('🔍 Debug - Environment loaded:', process.env.REACT_APP_FIREBASE_API_KEY ? 'YES' : 'NO');
+console.log('🔍 Debug - API Key being used:', process.env.FIREBASE_API_KEY ? 'REAL KEY' : 'DEMO KEY');
+console.log('🔍 Debug - Environment loaded:', process.env.FIREBASE_API_KEY ? 'YES' : 'NO');
 
 // Test mode flag - set to true to bypass Firebase for UI testing
-const TEST_MODE = process.env.REACT_APP_TEST_MODE === 'true';
+const TEST_MODE = process.env.TEST_MODE === 'true';
 
 // Validate Firebase config
 const validateFirebaseConfig = () => {
@@ -44,7 +44,7 @@ const validateFirebaseConfig = () => {
     console.error('4. Copy the Firebase config object');
     console.error('5. Update the .env file with your real credentials');
     console.error('📖 See FIREBASE_SETUP_INSTRUCTIONS.md for detailed steps');
-    console.error('💡 Or set REACT_APP_TEST_MODE=true in .env to bypass Firebase');
+    console.error('💡 Or set TEST_MODE=true in .env to bypass Firebase');
     return false;
   }
   
@@ -302,7 +302,7 @@ export const requestNotificationPermission = async () => {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       const token = await getToken(messaging, {
-        vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY
+        vapidKey: process.env.FIREBASE_VAPID_KEY
       });
       console.log('Notification token:', token);
       return token;

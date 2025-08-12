@@ -1,43 +1,43 @@
 // Environment configuration with validation
 export const environment = {
   // API Configuration
-  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001',
+  apiBaseUrl: process.env.API_BASE_URL || 'https://messnger-backend-1.onrender.com',
   
   // Firebase Configuration
   firebase: {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.REACT_APP_FIREBASE_APP_ID,
-    measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+    apiKey: process.env.FIREBASE_API_KEY,
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.FIREBASE_APP_ID,
+    measurementId: process.env.FIREBASE_MEASUREMENT_ID,
   },
   
   // App Configuration
   app: {
-    name: process.env.REACT_APP_APP_NAME || 'WhatsApp Web UI',
-    version: process.env.REACT_APP_APP_VERSION || '1.0.0',
-    environment: process.env.REACT_APP_ENVIRONMENT || 'development',
+    name: process.env.APP_NAME || 'WhatsApp Web UI',
+    version: process.env.APP_VERSION || '1.0.0',
+    environment: process.env.ENVIRONMENT || 'development',
   },
   
   // Feature Flags
   features: {
-    authentication: process.env.REACT_APP_ENABLE_AUTHENTICATION === 'true',
-    realTimeMessaging: process.env.REACT_APP_ENABLE_REAL_TIME_MESSAGING === 'true',
-    fileUpload: process.env.REACT_APP_ENABLE_FILE_UPLOAD === 'true',
+    authentication: process.env.ENABLE_AUTHENTICATION === 'true',
+    realTimeMessaging: process.env.ENABLE_REAL_TIME_MESSAGING === 'true',
+    fileUpload: process.env.ENABLE_FILE_UPLOAD === 'true',
   },
   
   // UI Configuration
   ui: {
-    theme: process.env.REACT_APP_THEME || 'light',
-    language: process.env.REACT_APP_LANGUAGE || 'en',
+    theme: process.env.THEME || 'light',
+    language: process.env.LANGUAGE || 'en',
   },
 };
 
 // API Constants for backend endpoints
 export const API_CONSTANTS = {
-  BASE_URL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001',
+  BASE_URL: process.env.API_BASE_URL || 'http://localhost:3001',
   ENDPOINTS: {
     SEND_MESSAGE: '/api/sendMessage',
     GET_MESSAGES: '/api/getMessages',

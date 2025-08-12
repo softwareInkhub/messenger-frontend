@@ -20,30 +20,30 @@ console.log('==================================================');
 const envTemplate = `# Firebase Configuration
 # Replace these values with your actual Firebase project configuration
 
-REACT_APP_FIREBASE_API_KEY=your_firebase_api_key_here
-REACT_APP_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-REACT_APP_FIREBASE_PROJECT_ID=your_project_id
-REACT_APP_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID=123456789
-REACT_APP_FIREBASE_APP_ID=1:123456789:web:abcdef123456
-REACT_APP_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
+FIREBASE_API_KEY=your_firebase_api_key_here
+FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=123456789
+FIREBASE_APP_ID=1:123456789:web:abcdef123456
+FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 
 # API Configuration
-REACT_APP_API_BASE_URL=http://localhost:3001
+API_BASE_URL=https://messnger-backend-1.onrender.com
 
 # Feature Flags
-REACT_APP_ENABLE_AUTHENTICATION=true
-REACT_APP_ENABLE_REAL_TIME_MESSAGING=true
-REACT_APP_ENABLE_FILE_UPLOAD=true
+ENABLE_AUTHENTICATION=true
+ENABLE_REAL_TIME_MESSAGING=true
+ENABLE_FILE_UPLOAD=true
 
 # App Configuration
-REACT_APP_APP_NAME=WhatsApp Web UI
-REACT_APP_APP_VERSION=1.0.0
-REACT_APP_ENVIRONMENT=development
+APP_NAME=WhatsApp Web UI
+APP_VERSION=1.0.0
+ENVIRONMENT=development
 
 # UI Configuration
-REACT_APP_THEME=light
-REACT_APP_LANGUAGE=en`;
+THEME=light
+LANGUAGE=en`;
 
 console.log(envTemplate);
 console.log('\n🔧 After creating .env file:');
