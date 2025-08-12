@@ -29,7 +29,7 @@ FIREBASE_APP_ID=1:123456789:web:abcdef123456
 FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 
 # API Configuration
-API_BASE_URL=https://messnger-backend-1.onrender.com
+react_app_api_base_url=https://messnger-backend-1.onrender.com
 
 # Feature Flags
 ENABLE_AUTHENTICATION=true

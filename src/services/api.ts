@@ -3,7 +3,7 @@ import { API_CONSTANTS, ERROR_MESSAGES } from '../utils/constants';
 import { Logger } from '../utils/logger';
 
 // API Configuration - Using environment variables
-const API_BASE_URL = environment.apiBaseUrl;
+const react_app_api_base_url = environment.apiBaseUrl;
 
 // API Response Types
 export interface ApiResponse<T = any> {
@@ -31,7 +31,7 @@ export interface SendMessageRequest {
 class ApiService {
   private baseURL: string;
 
-  constructor(baseURL: string = API_BASE_URL) {
+  constructor(baseURL: string = react_app_api_base_url) {
     this.baseURL = baseURL;
   }
 

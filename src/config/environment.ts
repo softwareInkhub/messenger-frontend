@@ -1,7 +1,7 @@
 // Environment configuration with validation
 export const environment = {
   // API Configuration
-  apiBaseUrl: process.env.API_BASE_URL || 'https://messnger-backend-1.onrender.com',
+  apiBaseUrl: process.env.REACT_APP_API_BASE_URL || process.env.API_BASE_URL || 'https://messnger-backend-1.onrender.com',
   
   // Firebase Configuration
   firebase: {
@@ -37,7 +37,7 @@ export const environment = {
 
 // API Constants for backend endpoints
 export const API_CONSTANTS = {
-  BASE_URL: process.env.API_BASE_URL || 'http://localhost:3001',
+  BASE_URL: process.env.REACT_APP_API_BASE_URL || process.env.API_BASE_URL || 'https://messnger-backend-1.onrender.com',
   ENDPOINTS: {
     SEND_MESSAGE: '/api/sendMessage',
     GET_MESSAGES: '/api/getMessages',
