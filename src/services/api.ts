@@ -29,7 +29,7 @@ export interface SendMessageRequest {
 
 // API Service Class
 class ApiService {
-  private baseURL: string;
+  public baseURL: string;
 
   constructor(baseURL: string = react_app_api_base_url) {
     this.baseURL = baseURL;
@@ -42,9 +42,13 @@ class ApiService {
   ): Promise<ApiResponse<T>> {
     try {
       const url = `${this.baseURL}${endpoint}`;
+      console.log('🌐 Making API request to:', url);
+      
       const config: RequestInit = {
+        method: options.method || 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           ...options.headers,
         },
         ...options,
@@ -53,15 +57,26 @@ class ApiService {
       Logger.logApiRequest(config.method || 'GET', url, config.body ? JSON.parse(config.body as string) : {});
 
       const response = await fetch(url, config);
-      const data = await response.json();
-
+      console.log('📡 Response status:', response.status, response.statusText);
+      
       if (!response.ok) {
-        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('❌ HTTP Error:', response.status, errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
+      
+      const data = await response.json();
+      console.log('✅ Response data:', data);
 
       Logger.logApiResponse(config.method || 'GET', url, response.status, data);
       return data;
     } catch (error) {
+      console.error('💥 Network error details:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        baseURL: this.baseURL,
+        endpoint: endpoint
+      });
       Logger.logApiError(options.method || 'GET', `${this.baseURL}${endpoint}`, error);
       throw error;
     }
@@ -116,11 +131,39 @@ class ApiService {
   // Test connection to backend
   async testConnection(): Promise<boolean> {
     try {
-      await this.getMessages(1);
-      Logger.info('🟢 Backend connection successful');
+      console.log('🧪 Testing backend connection to:', this.baseURL);
+      const response = await fetch(`${this.baseURL}/api/health`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        console.log('✅ Backend health check successful');
+        return true;
+      } else {
+        console.log('⚠️ Backend health check failed with status:', response.status);
+        return false;
+      }
+    } catch (error) {
+      console.error('❌ Backend connection test failed:', error);
+      return false;
+    }
+  }
+
+  // Test basic connectivity
+  async testBasicConnectivity(): Promise<boolean> {
+    try {
+      console.log('🔍 Testing basic connectivity to:', this.baseURL);
+      const response = await fetch(`${this.baseURL}`, {
+        method: 'GET',
+        mode: 'cors',
+      });
+      console.log('📡 Basic connectivity response:', response.status);
       return true;
     } catch (error) {
-      Logger.error('🔴 Backend connection failed:', error);
+      console.error('❌ Basic connectivity failed:', error);
       return false;
     }
   }

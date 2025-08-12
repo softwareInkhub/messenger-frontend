@@ -48,6 +48,26 @@ export const useMessaging = (currentUserId: string, selectedContactId: string): 
   const [error, setError] = useState<string | null>(null);
   // const [isConnected, setIsConnected] = useState(true); // Always connected
 
+  // Test backend connectivity on mount
+  useEffect(() => {
+    const testBackendConnection = async () => {
+      console.log('🔍 Testing backend connection...');
+      const isConnected = await apiService.testBasicConnectivity();
+      if (!isConnected) {
+        console.error('❌ Backend is not reachable. Please check:');
+        console.error('1. Backend URL is correct:', apiService.baseURL);
+        console.error('2. Backend server is running');
+        console.error('3. CORS is properly configured');
+        console.error('4. Network connectivity');
+        setError('Backend connection failed. Please check your network connection.');
+      } else {
+        console.log('✅ Backend connectivity test passed');
+      }
+    };
+    
+    testBackendConnection();
+  }, []);
+
   // Fetch messages for the current conversation
   const refreshMessages = useCallback(async () => {
     console.log('🔄 refreshMessages called with:', { currentUserId, selectedContactId });
