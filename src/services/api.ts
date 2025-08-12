@@ -3,7 +3,7 @@ import { API_CONSTANTS } from '../utils/constants';
 import { Logger } from '../utils/logger';
 
 // API Configuration - Using environment variables
-const react_app_api_base_url = environment.apiBaseUrl;
+const react_app_api_base_url = environment.apiBaseUrl || window.location.origin;
 
 // API Response Types
 export interface ApiResponse<T = any> {
@@ -40,46 +40,60 @@ class ApiService {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    try {
-      const url = `${this.baseURL}${endpoint}`;
-      console.log('🌐 Making API request to:', url);
-      
-      const config: RequestInit = {
-        method: options.method || 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          ...options.headers,
-        },
-        ...options,
-      };
+    const url = `${this.baseURL}${endpoint}`;
+    console.log('🌐 Making API request to:', url);
+    
+    // Try different CORS configurations
+    const corsConfigs = [
+      { mode: 'cors' as RequestMode, credentials: 'omit' as RequestCredentials },
+      { mode: 'cors' as RequestMode, credentials: 'include' as RequestCredentials },
+      { mode: 'no-cors' as RequestMode }
+    ];
 
-      Logger.logApiRequest(config.method || 'GET', url, config.body ? JSON.parse(config.body as string) : {});
+    for (const corsConfig of corsConfigs) {
+      try {
+        console.log('🔧 Trying CORS config:', corsConfig);
+        
+        const config: RequestInit = {
+          method: options.method || 'GET',
+          ...corsConfig,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            ...options.headers,
+          },
+          ...options,
+        };
 
-      const response = await fetch(url, config);
-      console.log('📡 Response status:', response.status, response.statusText);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ HTTP Error:', response.status, errorText);
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        Logger.logApiRequest(config.method || 'GET', url, config.body ? JSON.parse(config.body as string) : {});
+
+        const response = await fetch(url, config);
+        console.log('📡 Response status:', response.status, response.statusText);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ HTTP Error:', response.status, errorText);
+          throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+        
+        const data = await response.json();
+        console.log('✅ Response data:', data);
+
+        Logger.logApiResponse(config.method || 'GET', url, response.status, data);
+        return data;
+      } catch (error) {
+        console.error(`💥 CORS config ${corsConfig.mode} failed:`, error);
+        // Continue to next config if this one fails
+        if (corsConfig === corsConfigs[corsConfigs.length - 1]) {
+          // This was the last attempt, throw the error
+          console.error('💥 All CORS configurations failed');
+          Logger.logApiError(options.method || 'GET', `${this.baseURL}${endpoint}`, error);
+          throw error;
+        }
       }
-      
-      const data = await response.json();
-      console.log('✅ Response data:', data);
-
-      Logger.logApiResponse(config.method || 'GET', url, response.status, data);
-      return data;
-    } catch (error) {
-      console.error('💥 Network error details:', {
-        error: error,
-        message: error instanceof Error ? error.message : 'Unknown error',
-        baseURL: this.baseURL,
-        endpoint: endpoint
-      });
-      Logger.logApiError(options.method || 'GET', `${this.baseURL}${endpoint}`, error);
-      throw error;
     }
+    
+    throw new Error('All CORS configurations failed');
   }
 
   // Send a message to backend

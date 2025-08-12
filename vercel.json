@@ -11,6 +11,10 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "https://messnger-backend-1.onrender.com/api/$1"
+    },
+    {
       "src": "/static/(.*)",
       "dest": "/static/$1"
     },
@@ -20,7 +24,7 @@
     }
   ],
   "env": {
-    "REACT_APP_API_BASE_URL": "https://your-vercel-backend-url.vercel.app"
+    "REACT_APP_API_BASE_URL": "https://messnger-backend-1.onrender.com"
   }
 }
 
